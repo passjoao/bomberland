@@ -42,6 +42,8 @@ class Agent():
     # essa func recebe o x e y da unidade e o x e y da bomba 
     # atualmente é feito por if(x !=agent_x or x !=agent_x+1 or y != agent_y or y != agent_y+1):
 
+    # definir func para tomada de decisão de onde colocar a bomba
+
     async def _on_game_tick(self, tick_number, game_state):
         # get my units
         # recuperando os agentes/unidades
