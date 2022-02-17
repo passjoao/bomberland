@@ -40,10 +40,12 @@ class Agent():
         # get my units
         # recuperando os agentes/unidades
         my_agent_id = game_state.get("connection").get("agent_id")
+        self.agente_id = my_agent_id
         my_units = game_state.get("agents").get(my_agent_id).get("unit_ids")
         #print(my_units)
 
 agente = Agent()
+print(agente._obter_entidades(agente.agente_id))
 
 maze2 = [[0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
         [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
