@@ -1,14 +1,19 @@
+# Contamos com observações feitas por Lucas de Oliveira Umbelino, amigo convidado
+# LS4tLiAtLS0uIC0uLiAuLiAtLS4gLS0tIC8gLi0tLiAuLiAtLi0uIC4t (e.g.)
+
 from typing import Union
 from game_state import GameState
 import asyncio
 import random
 import os
+from imports.astar import Node, astar # importando implementação do A*
 
 uri = os.environ.get(
     'GAME_CONNECTION_STRING') or "ws://127.0.0.1:3000/?role=agent&agentId=agentId&name=defaultName"
 
 acoes = ["up", "down", "left", "right", "bomb", "detonate"]
 
+# A*
 
 class Agent():
     def __init__(self):
@@ -43,6 +48,12 @@ class Agent():
     # atualmente é feito por if(x !=agent_x or x !=agent_x+1 or y != agent_y or y != agent_y+1):
 
     # definir func para tomada de decisão de onde colocar a bomba
+
+    # https://alumni.media.mit.edu/~jorkin/goap.html
+    # perguntar pra joao história do ataque no bd da bolsa
+
+    # usar tentativa e erro na hora de verificar se existe uma entidade que 
+    # seja relevante para a tomada de decisão
 
     async def _on_game_tick(self, tick_number, game_state):
         # get my units
