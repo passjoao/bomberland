@@ -54,15 +54,16 @@ class Agent():
         else:
             return None
 
-    def _obter_coordenada_de_bomba_para_detonar(self, unit) -> Union[int, int] or None:
+    def _obter_entidades(self, unit) -> Union[int, int] or None:
         entidades = self._client._state.get("entities")
-        bombas = list(filter(lambda entity: entity.get(
-            "unit_id") == unit and entity.get("type") == "b", entidades))
-        bomb = next(iter(bombas or []), None)
-        if bomb != None:
-            return [bomb.get("x"), bomb.get("y")]
-        else:
-            return None    
+        return list(filter(lambda entity: entity.get(
+            (entity.get("type") == "m" or
+            entity.get("type") == "w" or
+            entity.get("type") == "o" or 
+            entity.get("type") == "b" or
+            entity.get("type") == "x"), entidades)))
+        # return list(filter(lambda entity: entity.get(
+        #     "unit_id") == unit and entity.get("type") == "b", entidades))
 
     # usar o A* para definir uma função que retorne o melhor posicionamento para a unidade no momento de explosao
     # essa func recebe o x e y da unidade e o x e y da bomba 
@@ -77,6 +78,37 @@ class Agent():
         # recuperando os agentes/unidades
         my_agent_id = game_state.get("connection").get("agent_id")
         my_units = game_state.get("agents").get(my_agent_id).get("unit_ids")
+
+        print('# ENTIDADES: ')
+        print(agente._obter_entidades(agente.agente_id))
+
+        maze2 = [[0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
+                [0, 0, 0, 0, 1, 1, 1, 0, 1, 1],
+                [0, 0, 0, 0, 1, 0, 0, 0, 1, 1],
+                [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+
+        # 0 para pode passar
+        # 1 para não pode passar
+        # na destruição de bloco mudar para 0
+        # não pode passar por cima da bomba, ao plantar mudar para 1
+        # não tem colisão com inimigo
+
+        # a* vai ser usado para:
+        # chegar na unidade inimiga (viva) mais próxima da unidade atual (achar melhor caminho)
+        # se puder plantar 1 bomba, planta
+        # segue o inimigo se não tiver bomba perto dele, senão foge (switch case)
+
+        start = (0, 0)
+        end = (9, 9)
+
+        path = astar(maze2, start, end)
+        print(path)
 
         # send each unit a random acao
         # tomada de decisão de cada unidade
