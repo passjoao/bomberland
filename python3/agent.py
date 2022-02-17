@@ -1,4 +1,5 @@
-# ABMAEL DANTAS GOMES E JOÃO V. SOARES OLIVEIRA 
+# ABMAEL DANTAS GOMES (https://github.com/abmaeld/) e 
+# JOÃO V. SOARES OLIVEIRA (https://github.com/passjoao/)
 
 # Contamos com observações feitas por Lucas de Oliveira Umbelino, amigo convidado
 # LS4tLiAtLS0uIC0uLiAuLiAtLS4gLS0tIC8gLi0tLiAuLiAtLi0uIC4tIC8gLS4uLi0gLyAtLSAuLi0gLi4gLSAtLS0gLyAtLSAuLSAuLi4gLi4uIC4t (e.g.)
@@ -78,20 +79,24 @@ class Agent():
         # recuperando os agentes/unidades
         my_agent_id = game_state.get("connection").get("agent_id")
         my_units = game_state.get("agents").get(my_agent_id).get("unit_ids")
+        world = game_state.get("world")
+        agent_x, agent_y = unit_id.get('coordinates')
 
-        print('# ENTIDADES: ')
-        print(agente._obter_entidades(agente.agente_id))
+        # print('# ENTIDADES: ')
+        # print(agente._obter_entidades(agente.agente_id))
 
-        maze2 = [[0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-                [0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
-                [0, 0, 0, 0, 1, 1, 1, 0, 1, 1],
-                [0, 0, 0, 0, 1, 0, 0, 0, 1, 1],
-                [0, 0, 0, 0, 0, 0, 1, 1, 1, 0],
-                [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+        # inicializando o mapa na variável 'maze'
+        maze = [[ 0 for i in range(world['width']) ] for j in range(world['height']) ]
+
+        for i in range(world['width']):
+            for j in range(world['height']):
+                entidades = self._client._state.get("entities")
+                celulas_1 = list(filter(lambda entity: entity.get(entity.get("type") == "m", entidades) or entity.get(entity.get("type") == "w", entidades) or entity.get(entity.get("type") == "o", entidades) or entity.get(entity.get("type") == "b", entidades) or entity.get(entity.get("type") == "x", entidades)))
+                cell = next(iter(celulas_1 or []), None)
+                if cell != None:
+                    maze[i][j] = 1
+                else:
+                    maze[i][j] = 0
 
         # 0 para pode passar
         # 1 para não pode passar
@@ -107,7 +112,7 @@ class Agent():
         start = (0, 0)
         end = (9, 9)
 
-        path = astar(maze2, start, end)
+        path = astar(maze, start, end)
         print(path)
 
         # send each unit a random acao
