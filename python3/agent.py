@@ -23,6 +23,7 @@ import asyncio
 import random
 import os
 from imports.astar import Node, astar # importando implementação do A*
+from improts.mathfuncs import dist # distância euclidiana
 
 uri = os.environ.get(
     'GAME_CONNECTION_STRING') or "ws://127.0.0.1:3000/?role=agent&agentId=agentId&name=defaultName"
@@ -108,19 +109,45 @@ class Agent():
         # chegar na unidade inimiga (viva) mais próxima da unidade atual (achar melhor caminho)
         # se puder plantar 1 bomba, planta
         # segue o inimigo se não tiver bomba perto dele, senão foge (switch case)
-
-        start = (0, 0)
-        end = (9, 9)
-
-        path = astar(maze, start, end)
-        print(path)
-
+        
         # send each unit a random acao
         # tomada de decisão de cada unidade
+
         for unit_id in my_units:
+            
+            # recupera agents
+            agents = self._client._state.get("agents")
+
+            # escolhe a ação que toma no tick:
             acao = random.choice(acoes)
+
+            # escolhe o movimento:
+            unit_x, unit_y = unit_id.get('coordinates')
+            start = (unit_x, unit_y)
+            alvo_x, alvo_y = 0, 0
+            d_min = 99999999
+            
+            for agente in agents:
+                if agente['agent_id'] != my_agent_id:
+                    for unidade_id in agente['unit_ids']:
+                        entidade = entity.get(unidade_id)
+                        distancia = dist(unit_x, unit_y, entidade.get("x"), entidade.get("y"))
+                        if distancia <= d_min:
+                            alvo_x = entidade.get("x")
+                            alvo_y = entidade.get("y")
+                            d_min = distancia
+
+            end = (alvo_x, alvo_y)
+            path = astar(maze, start, end)
+        
+            
+            # tansforma pares ordenados (x,y) para "up", "down", "left", "right"
+
+            # movimento:
             if acao in ["up", "left", "right", "down"]:
                 await self._client.send_move(acao, unit_id)
+
+            # planta bomba:
             elif acao == "bomb":
                 await self._client.send_bomb(unit_id)
 
@@ -129,7 +156,7 @@ class Agent():
                 bomba_coordenadas = self._obter_coordenada_de_bomba_para_detonar(unit_id)
                 if bomba_coordenadas != None:
                     x, y = bomba_coordenadas
-                    agent_x, agent_y = unit_id.get('coordinates')
+                    # agent_x, agent_y = unit_id.get('coordinates')
                     if(x !=agent_x or x !=agent_x+1 or y != agent_y or y != agent_y+1):
                         await self._client.send_detonate(x, y, unit_id)
             else:
