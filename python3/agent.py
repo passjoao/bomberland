@@ -42,6 +42,8 @@ class Agent():
         my_units = game_state.get("agents").get(my_agent_id).get("unit_ids")
 
         # send each unit a random action
+
+        
         for unit_id in my_units:
 
             action = random.choice(actions)
@@ -54,7 +56,9 @@ class Agent():
                 bomb_coordinates = self._get_bomb_to_detonate(unit_id)
                 if bomb_coordinates != None:
                     x, y = bomb_coordinates
-                    await self._client.send_detonate(x, y, unit_id)
+                    agent_x, agent_y = unit_id.get('coordinates')
+                    if(x !=agent_x or x !=agent_x+1 or y != agent_y or y != agent_y+1):
+                        await self._client.send_detonate(x, y, unit_id)
             else:
                 print(f"Unhandled action: {action} for unit {unit_id}")
 
