@@ -1,5 +1,20 @@
+# ABMAEL DANTAS GOMES E JOÃO V. SOARES OLIVEIRA 
+
 # Contamos com observações feitas por Lucas de Oliveira Umbelino, amigo convidado
-# LS4tLiAtLS0uIC0uLiAuLiAtLS4gLS0tIC8gLi0tLiAuLiAtLi0uIC4t (e.g.)
+# LS4tLiAtLS0uIC0uLiAuLiAtLS4gLS0tIC8gLi0tLiAuLiAtLi0uIC4tIC8gLS4uLi0gLyAtLSAuLi0gLi4gLSAtLS0gLyAtLSAuLSAuLi4gLi4uIC4t (e.g.)
+
+''' 
+Link do problema
+    Bomberland | Coder One (gocoder.one)
+O que submeter
+    Arquivo principal (agent.*) e eventuais arquivos secundários desenvolvidos pelo grupo; (agent.py, astar-test-bomberland-maze.py, imports/)
+    README.md identificando os participantes do grupo, descrevendo a estratégia adotada (o que pretendeu ser feito) e as técnicas utilizadas e eventuais bibliotecas externas (nome e versão).
+Compacte os arquivos em um único arquivo (.zip, tgz, .7z etc).
+Critérios de avaliação
+    Documentação e organização do código
+    Adequação das técnicas utilizadas
+    Qualidade do resultado
+'''
 
 from typing import Union
 from game_state import GameState
@@ -12,8 +27,6 @@ uri = os.environ.get(
     'GAME_CONNECTION_STRING') or "ws://127.0.0.1:3000/?role=agent&agentId=agentId&name=defaultName"
 
 acoes = ["up", "down", "left", "right", "bomb", "detonate"]
-
-# A*
 
 class Agent():
     def __init__(self):
@@ -41,16 +54,20 @@ class Agent():
         else:
             return None
 
-    # fazer o "cérebro" do agente aqui por fora, e tomada de decisão
-    # fazer o A*
+    def _obter_coordenada_de_bomba_para_detonar(self, unit) -> Union[int, int] or None:
+        entidades = self._client._state.get("entities")
+        bombas = list(filter(lambda entity: entity.get(
+            "unit_id") == unit and entity.get("type") == "b", entidades))
+        bomb = next(iter(bombas or []), None)
+        if bomb != None:
+            return [bomb.get("x"), bomb.get("y")]
+        else:
+            return None    
+
     # usar o A* para definir uma função que retorne o melhor posicionamento para a unidade no momento de explosao
     # essa func recebe o x e y da unidade e o x e y da bomba 
     # atualmente é feito por if(x !=agent_x or x !=agent_x+1 or y != agent_y or y != agent_y+1):
-
     # definir func para tomada de decisão de onde colocar a bomba
-
-    # https://alumni.media.mit.edu/~jorkin/goap.html
-    # perguntar pra joao história do ataque no bd da bolsa
 
     # usar tentativa e erro na hora de verificar se existe uma entidade que 
     # seja relevante para a tomada de decisão
@@ -81,10 +98,8 @@ class Agent():
             else:
                 print(f"Unhandled acao: {acao} for unit {unit_id}")
 
-
 def main():
     Agent()
-
 
 if __name__ == "__main__":
     main()
