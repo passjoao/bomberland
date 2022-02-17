@@ -21,6 +21,7 @@ services:
             - coderone-tournament
 
     # Uncomment the following "agent-a" blocks to connect a second agent to the environment
+    # Descomentar para adicionar o agente a ao ambiente
 
     # agent-a:
     #     extends:
