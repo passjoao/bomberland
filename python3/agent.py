@@ -123,6 +123,7 @@ class Agent():
         for unit_id in my_units: 
             # recupera agents
             agents = self._client._state.get("agents")
+            unidade_estado = self._client._state.get("unit_state")[unit_id]
 
             # escolhe a ação que toma no tick:
             # decisão probabilística:
@@ -135,7 +136,8 @@ class Agent():
 
             if tipo_acao == "move":
                 # escolhe o movimento:
-                unit_x, unit_y = unit_id.get('coordinates')
+                coordenadas = unidade_estado['coordinates']
+                unit_x, unit_y = coordenadas['x'], coordenadas['y']
                 start = (unit_x, unit_y)
                 alvo_x, alvo_y = 0, 0
                 d_min = 99999999
@@ -144,12 +146,12 @@ class Agent():
                     if agente['agent_id'] != my_agent_id:
                         for unidade_id in agente['unit_ids']:
                             #entidade = self._client._state.get(unidade_id)
-                            unit_state = self._client._state.get(unit_state)
+                            unit_state = self._client._state.get("unit_state")
                             unidade = unit_state[unidade_id]
-                            distancia = dist(unit_x, unit_y, unidade.get("x"), unidade.get("y"))
+                            distancia = dist(unit_x, unit_y, unidade['coordinates']['x'], unidade['coordinates']['y'])
                             if distancia <= d_min:
-                                alvo_x = unidade.get("x")
-                                alvo_y = unidade.get("y")
+                                alvo_x = unidade['coordinates']['x']
+                                alvo_y = unidade['coordinates']['y']
                                 d_min = distancia
 
                 end = (alvo_x, alvo_y)
@@ -207,7 +209,11 @@ class Agent():
                 else:
                     acao = random.choice(["up", "left", "right", "down"])
             else:
-                acao = tipo_acao
+                if tipo_acao == "bomb":
+                    if unidade_estado['inventory']['bombs'] > 0:
+                        acao = tipo_acao
+                elif acao == "detonate":
+                    acao = tipo_acao
 
             # movimento:
             if acao in ["up", "left", "right", "down"]:
