@@ -81,7 +81,7 @@ class Agent():
         my_agent_id = game_state.get("connection").get("agent_id")
         my_units = game_state.get("agents").get(my_agent_id).get("unit_ids")
         world = game_state.get("world")
-        agent_x, agent_y = unit_id.get('coordinates')
+        #
 
         # print('# ENTIDADES: ')
         # print(agente._obter_entidades(agente.agente_id))
@@ -92,7 +92,12 @@ class Agent():
         for i in range(world['width']):
             for j in range(world['height']):
                 entidades = self._client._state.get("entities")
-                celulas_1 = list(filter(lambda entity: entity.get(entity.get("type") == "m", entidades) or entity.get(entity.get("type") == "w", entidades) or entity.get(entity.get("type") == "o", entidades) or entity.get(entity.get("type") == "b", entidades) or entity.get(entity.get("type") == "x", entidades)))
+                celulas_1 = list(filter(lambda entity: 
+                    entity.get(entity.get("type") == "m", entidades) or
+                    entity.get(entity.get("type") == "w", entidades) or 
+                    entity.get(entity.get("type") == "o", entidades) or 
+                    entity.get(entity.get("type") == "b", entidades) or 
+                    entity.get(entity.get("type") == "x", entidades)))
                 cell = next(iter(celulas_1 or []), None)
                 if cell != None:
                     maze[i][j] = 1
@@ -136,7 +141,7 @@ class Agent():
                 for agente in agents:
                     if agente['agent_id'] != my_agent_id:
                         for unidade_id in agente['unit_ids']:
-                            entidade = self._client._state.get("entities")
+                            entidade = self._client._state.get(unidade_id)
                             distancia = dist(unit_x, unit_y, entidade.get("x"), entidade.get("y"))
                             if distancia <= d_min:
                                 alvo_x = entidade.get("x")
