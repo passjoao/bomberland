@@ -113,35 +113,92 @@ class Agent():
         # send each unit a random acao
         # tomada de decisão de cada unidade
 
-        for unit_id in my_units:
-            
+        for unit_id in my_units: 
             # recupera agents
             agents = self._client._state.get("agents")
 
             # escolhe a ação que toma no tick:
-            acao = random.choice(acoes)
+            # decisão probabilística:
+            tipo_acao = "move"
+            possibilities = ([["move", 0.55], ["bomb", 0.44], ["detonate", 0.33]])
+            for possibility in possibilities:
+                if random.randrange(100) < possibility[1] * 100:
+                    tipo_acao = possibility[0]
+                    break
 
-            # escolhe o movimento:
-            unit_x, unit_y = unit_id.get('coordinates')
-            start = (unit_x, unit_y)
-            alvo_x, alvo_y = 0, 0
-            d_min = 99999999
-            
-            for agente in agents:
-                if agente['agent_id'] != my_agent_id:
-                    for unidade_id in agente['unit_ids']:
-                        entidade = entity.get(unidade_id)
-                        distancia = dist(unit_x, unit_y, entidade.get("x"), entidade.get("y"))
-                        if distancia <= d_min:
-                            alvo_x = entidade.get("x")
-                            alvo_y = entidade.get("y")
-                            d_min = distancia
+            if tipo_acao == "move":
+                # escolhe o movimento:
+                unit_x, unit_y = unit_id.get('coordinates')
+                start = (unit_x, unit_y)
+                alvo_x, alvo_y = 0, 0
+                d_min = 99999999
 
-            end = (alvo_x, alvo_y)
-            path = astar(maze, start, end)
-        
-            
-            # tansforma pares ordenados (x,y) para "up", "down", "left", "right"
+                for agente in agents:
+                    if agente['agent_id'] != my_agent_id:
+                        for unidade_id in agente['unit_ids']:
+                            entidade = entity.get(unidade_id)
+                            distancia = dist(unit_x, unit_y, entidade.get("x"), entidade.get("y"))
+                            if distancia <= d_min:
+                                alvo_x = entidade.get("x")
+                                alvo_y = entidade.get("y")
+                                d_min = distancia
+
+                end = (alvo_x, alvo_y)
+                path = astar(maze, start, end)
+                
+                # tansforma pares de pares ordenados (x,y) (z,w) para "up", "down", "left", "right"
+                # tratar diagonais do A* (se bloqueado pelos lados, mas livre na diagonal e esbarrar num bloco, rodar pathfinder novamente bloqueando a diagonal)
+                # path[0] -> path[1]
+                
+                if path[1][0] > path[0][0] and path[1][1] == path[0][1]:
+                    acao = "right"
+                elif path[1][0] < path[0][0] and path[1][1] == path[0][1]:
+                    acao = "left"
+                
+                elif path[1][0] > path[0][0] and path[1][1] > path[0][1]: # down right
+                    if path[1][0] < world['width']-1 and path[1][1] < world['height']-1: 
+                        if maze[path[0][0], path[0][1]+1] != 1:
+                            acao = "down"
+                        elif maze[path[0][0]+1, path[0][1]] != 1:
+                            acao = "right"
+                        else:
+                            acao = random.choice(["up", "left", "right", "down"])
+                
+                elif path[1][0] > path[0][0] and path[1][1] < path[0][1]: # up right
+                    if path[1][0] < world['width']-1 and path[1][1] > 0: 
+                        if maze[path[0][0], path[0][1]-1] != 1:
+                            acao = "up"
+                        elif maze[path[0][0]+1, path[0][1]] != 1:
+                            acao = "right"
+                        else:
+                            acao = random.choice(["up", "left", "right", "down"])
+
+                elif path[1][0] < path[0][0] and path[1][1] > path[0][1]: # down left
+                    if path[1][0] > 0 and path[1][1] < world['height']-1: 
+                        if maze[path[0][0], path[0][1]+1] != 1:
+                            acao = "down"
+                        elif maze[path[0][0]-1, path[0][1]] != 1:
+                            acao = "left"
+                        else:
+                            acao = random.choice(["up", "left", "right", "down"])
+
+                elif path[1][0] < path[0][0] and path[1][1] < path[0][1]: # up left
+                    if path[1][0] > 0 and path[1][1] > 0: 
+                        if maze[path[0][0], path[0][1]-1] != 1:
+                            acao = "up"
+                        elif maze[path[0][0]-1, path[0][1]] != 1:
+                            acao = "left"
+                        else:
+                            acao = random.choice(["up", "left", "right", "down"])
+
+                elif path[1][0] == path[0][0] and path[1][1] > path[0][1]:
+                    acao = "down"
+                elif path[1][0] == path[0][0] and path[1][1] < path[0][1]:
+                    acao = "up"
+                else:
+                    acao = random.choice(["up", "left", "right", "down"])
+            else:
+                acao = tipo_acao
 
             # movimento:
             if acao in ["up", "left", "right", "down"]:
@@ -156,8 +213,8 @@ class Agent():
                 bomba_coordenadas = self._obter_coordenada_de_bomba_para_detonar(unit_id)
                 if bomba_coordenadas != None:
                     x, y = bomba_coordenadas
-                    # agent_x, agent_y = unit_id.get('coordinates')
-                    if(x !=agent_x or x !=agent_x+1 or y != agent_y or y != agent_y+1):
+                    # unit_x, unit_y = unit_id.get('coordinates')
+                    if((x != unit_x and x != unit_x+1 and x != unit_x-1) and (y != unit_y and y != unit_y+1 and y != unit_y-1)):
                         await self._client.send_detonate(x, y, unit_id)
             else:
                 print(f"Unhandled acao: {acao} for unit {unit_id}")
