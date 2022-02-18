@@ -141,7 +141,7 @@ class Agent():
                 acao = tipo_acao
             elif tipo_acao == "bomb" and unidade_estado['inventory']['bombs'] > 0:
                 acao = tipo_acao
-            elif tipo_acao == "move" and unidade_estado['inventory']['bombs'] == 0:
+            elif tipo_acao == "move":
                 # escolhe o movimento:
                 coordenadas = unidade_estado['coordinates']
                 unit_x, unit_y = coordenadas['x'], coordenadas['y']
