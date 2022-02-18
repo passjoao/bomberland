@@ -176,14 +176,13 @@ class Agent():
                 path = astar(maze, start, end)
                 
                 # tansforma pares de pares ordenados (x,y) (z,w) para "up", "down", "left", "right"
-                # tratar diagonais do A* (se bloqueado pelos lados, mas livre na diagonal e esbarrar num bloco, rodar pathfinder novamente bloqueando a diagonal)
+                # tratar diagonais do A* 
                 # path[0] -> path[1]
                 
                 if path[1][0] > path[0][0] and path[1][1] == path[0][1]: # simple right
                     acao = "right"
                 elif path[1][0] < path[0][0] and path[1][1] == path[0][1]: # simple left
                     acao = "left"
-                
                 elif path[1][0] > path[0][0] and path[1][1] > path[0][1]: # diagonal down right
                     if path[1][0] < world['width']-1 and path[1][1] < world['height']-1: # se o bloco destino estiver dentro do mapa
                         if maze[path[0][0], path[0][1]+1] != 1: # se pra baixo não for bloqueado
@@ -192,7 +191,6 @@ class Agent():
                             acao = "right"
                         else:
                             acao = random.choice(["up", "left"])
-                
                 elif path[1][0] > path[0][0] and path[1][1] < path[0][1]: # diagonal up right
                     if path[1][0] < world['width']-1 and path[1][1] > 0: 
                         if maze[path[0][0], path[0][1]-1] != 1: # se pra cima não for bloqueado
@@ -201,7 +199,6 @@ class Agent():
                             acao = "right"
                         else:
                             acao = random.choice(["left", "down"])
-
                 elif path[1][0] < path[0][0] and path[1][1] > path[0][1]: # diagonal down left
                     if path[1][0] > 0 and path[1][1] < world['height']-1: 
                         if maze[path[0][0], path[0][1]+1] != 1: # se pra baixo não for bloqueado
@@ -210,7 +207,6 @@ class Agent():
                             acao = "left"
                         else:
                             acao = random.choice(["up", "right"])
-
                 elif path[1][0] < path[0][0] and path[1][1] < path[0][1]: # diagonal up left
                     if path[1][0] > 0 and path[1][1] > 0: 
                         if maze[path[0][0], path[0][1]-1] != 1: # se pra cima não for bloqueado
@@ -219,7 +215,6 @@ class Agent():
                             acao = "left"
                         else:
                             acao = random.choice(["right", "down"])
-
                 elif path[1][0] == path[0][0] and path[1][1] > path[0][1]:
                     acao = "down"
                 elif path[1][0] == path[0][0] and path[1][1] < path[0][1]:
