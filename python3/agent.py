@@ -128,7 +128,7 @@ class Agent():
             # escolhe a ação que toma no tick:
             # decisão probabilística:
             tipo_acao = "move"
-            possibilities = ([["detonate", 0.33], ["bomb", 0.44],["move", 0.55]])
+            possibilities = ([["detonate", 0.22], ["bomb", 0.33],["move", 0.55]])
             for possibility in possibilities:
                 if random.randrange(100) < possibility[1] * 100:
                     tipo_acao = possibility[0]
