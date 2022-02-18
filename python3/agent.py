@@ -119,6 +119,7 @@ class Agent():
         # tomada de decisão de cada unidade
 
         # só detonar ou plantar se tiver bomba no inventario
+        # ir atras de bomba
 
         for unit_id in my_units: 
             # recupera agents
@@ -128,13 +129,19 @@ class Agent():
             # escolhe a ação que toma no tick:
             # decisão probabilística:
             tipo_acao = "move"
-            possibilities = ([["detonate", 0.22], ["bomb", 0.55],["move", 0.66]])
+            possibilities = ([["detonate", 0.22], ["bomb", 0.55],["move", 0.66]]) # maquina de estados probabilística
             for possibility in possibilities:
                 if random.randrange(100) < possibility[1] * 100:
                     tipo_acao = possibility[0]
                     break
 
-            if tipo_acao == "move":
+            tem_bomba_plantada = True
+            
+            if tem_bomba_plantada and tipo_acao == "detonate":
+                acao = tipo_acao
+            elif tipo_acao == "bomb" and unidade_estado['inventory']['bombs'] > 0:
+                acao = tipo_acao
+            elif tipo_acao == "move" or unidade_estado['inventory']['bombs'] == 0:
                 # escolhe o movimento:
                 coordenadas = unidade_estado['coordinates']
                 unit_x, unit_y = coordenadas['x'], coordenadas['y']
@@ -142,16 +149,27 @@ class Agent():
                 alvo_x, alvo_y = 0, 0
                 d_min = 99999999
 
-                for agente in agents:
-                    if agente['agent_id'] != my_agent_id:
-                        for unidade_id in agente['unit_ids']:
-                            #entidade = self._client._state.get(unidade_id)
-                            unit_state = self._client._state.get("unit_state")
-                            unidade = unit_state[unidade_id]
-                            distancia = dist(unit_x, unit_y, unidade['coordinates']['x'], unidade['coordinates']['y'])
+                if unidade_estado['inventory']['bombs'] > 0:    
+                    for agente in agents:
+                        if agente['agent_id'] != my_agent_id:
+                            for unidade_id in agente['unit_ids']:
+                                #entidade = self._client._state.get(unidade_id)
+                                unit_state = self._client._state.get("unit_state")
+                                unidade = unit_state[unidade_id]
+                                distancia = dist(unit_x, unit_y, unidade['coordinates']['x'], unidade['coordinates']['y'])
+                                if distancia <= d_min:
+                                    alvo_x = unidade['coordinates']['x']
+                                    alvo_y = unidade['coordinates']['y']
+                                    d_min = distancia
+                else:
+                    todas_entidades = self._client._state.get("entities")
+                    for enti in todas_entidades:
+                        if enti['type'] == 'a':
+                            bomba_pra_pegar = enti
+                            distancia = dist(unit_x, unit_y, bomba_pra_pegar['x'], bomba_pra_pegar['y'])
                             if distancia <= d_min:
-                                alvo_x = unidade['coordinates']['x']
-                                alvo_y = unidade['coordinates']['y']
+                                alvo_x = bomba_pra_pegar['x']
+                                alvo_y = bomba_pra_pegar['y']
                                 d_min = distancia
 
                 end = (alvo_x, alvo_y)
@@ -209,12 +227,8 @@ class Agent():
                 else:
                     acao = random.choice(["up", "left", "right", "down"])
             else:
-                if tipo_acao == "bomb":
-                    if unidade_estado['inventory']['bombs'] > 0:
-                        acao = tipo_acao
-                elif acao == "detonate":
-                    acao = tipo_acao
-
+                acao = tipo_acao
+                
             # movimento:
             if acao in ["up", "left", "right", "down"]:
                 await self._client.send_move(acao, unit_id)
@@ -224,6 +238,7 @@ class Agent():
                 await self._client.send_bomb(unit_id)
 
             # quando for detonar, escolher melhor lugar para ir e o melhor momento para detonar
+            # usar blast_diameter
             elif acao == "detonate":
                 bomba_coordenadas = self._obter_coordenada_de_bomba_para_detonar(unit_id)
                 if bomba_coordenadas != None:
