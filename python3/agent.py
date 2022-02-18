@@ -23,7 +23,7 @@ import asyncio
 import random
 import os
 from imports.astar import Node, astar # importando implementação do A*
-from improts.mathfuncs import dist # distância euclidiana
+from imports.mathfuncs import dist # distância euclidiana
 
 uri = os.environ.get(
     'GAME_CONNECTION_STRING') or "ws://127.0.0.1:3000/?role=agent&agentId=agentId&name=defaultName"
@@ -136,7 +136,7 @@ class Agent():
                 for agente in agents:
                     if agente['agent_id'] != my_agent_id:
                         for unidade_id in agente['unit_ids']:
-                            entidade = entity.get(unidade_id)
+                            entidade = self._client._state.get("entities")
                             distancia = dist(unit_x, unit_y, entidade.get("x"), entidade.get("y"))
                             if distancia <= d_min:
                                 alvo_x = entidade.get("x")

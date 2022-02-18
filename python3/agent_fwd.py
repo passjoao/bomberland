@@ -40,8 +40,7 @@ class Agent():
     def _get_bomb_to_detonate(self, game_state) -> Union[int, int] or None:
         agent_number = game_state.get("connection").get("agent_number")
         entities = self._client._state.get("entities")
-        bombs = list(filter(lambda entity: entity.get(
-            "owner") == agent_number and entity.get("type") == "b", entities))
+        bombs = list(filter(lambda entity: entity.get("owner") == agent_number and entity.get("type") == "b", entities))
         bomb = next(iter(bombs or []), None)
         if bomb != None:
             return [bomb.get("x"), bomb.get("y")]
