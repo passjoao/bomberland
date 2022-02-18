@@ -118,6 +118,8 @@ class Agent():
         # send each unit a random acao
         # tomada de decisão de cada unidade
 
+        # só detonar ou plantar se tiver bomba no inventario
+
         for unit_id in my_units: 
             # recupera agents
             agents = self._client._state.get("agents")
@@ -125,7 +127,7 @@ class Agent():
             # escolhe a ação que toma no tick:
             # decisão probabilística:
             tipo_acao = "move"
-            possibilities = ([["move", 0.55], ["bomb", 0.44], ["detonate", 0.33]])
+            possibilities = ([["detonate", 0.33], ["bomb", 0.44],["move", 0.55]])
             for possibility in possibilities:
                 if random.randrange(100) < possibility[1] * 100:
                     tipo_acao = possibility[0]
@@ -141,11 +143,13 @@ class Agent():
                 for agente in agents:
                     if agente['agent_id'] != my_agent_id:
                         for unidade_id in agente['unit_ids']:
-                            entidade = self._client._state.get(unidade_id)
-                            distancia = dist(unit_x, unit_y, entidade.get("x"), entidade.get("y"))
+                            #entidade = self._client._state.get(unidade_id)
+                            unit_state = self._client._state.get(unit_state)
+                            unidade = unit_state[unidade_id]
+                            distancia = dist(unit_x, unit_y, unidade.get("x"), unidade.get("y"))
                             if distancia <= d_min:
-                                alvo_x = entidade.get("x")
-                                alvo_y = entidade.get("y")
+                                alvo_x = unidade.get("x")
+                                alvo_y = unidade.get("y")
                                 d_min = distancia
 
                 end = (alvo_x, alvo_y)
@@ -167,7 +171,7 @@ class Agent():
                         elif maze[path[0][0]+1, path[0][1]] != 1: # se pro lado não for bloqueado
                             acao = "right"
                         else:
-                            acao = random.choice(["up", "left", "right", "down"])
+                            acao = random.choice(["up", "left"])
                 
                 elif path[1][0] > path[0][0] and path[1][1] < path[0][1]: # diagonal up right
                     if path[1][0] < world['width']-1 and path[1][1] > 0: 
@@ -176,7 +180,7 @@ class Agent():
                         elif maze[path[0][0]+1, path[0][1]] != 1: # se pro lado não for bloqueado
                             acao = "right"
                         else:
-                            acao = random.choice(["up", "left", "right", "down"])
+                            acao = random.choice(["left", "down"])
 
                 elif path[1][0] < path[0][0] and path[1][1] > path[0][1]: # diagonal down left
                     if path[1][0] > 0 and path[1][1] < world['height']-1: 
@@ -185,7 +189,7 @@ class Agent():
                         elif maze[path[0][0]-1, path[0][1]] != 1: # se pro lado não for bloqueado
                             acao = "left"
                         else:
-                            acao = random.choice(["up", "left", "right", "down"])
+                            acao = random.choice(["up", "right"])
 
                 elif path[1][0] < path[0][0] and path[1][1] < path[0][1]: # diagonal up left
                     if path[1][0] > 0 and path[1][1] > 0: 
@@ -194,7 +198,7 @@ class Agent():
                         elif maze[path[0][0]-1, path[0][1]] != 1: # se pro lado não for bloqueado
                             acao = "left"
                         else:
-                            acao = random.choice(["up", "left", "right", "down"])
+                            acao = random.choice(["right", "down"])
 
                 elif path[1][0] == path[0][0] and path[1][1] > path[0][1]:
                     acao = "down"
