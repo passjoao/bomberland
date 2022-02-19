@@ -56,17 +56,6 @@ class Agent():
         else:
             return None
 
-    def _obter_entidades(self, unit) -> Union[int, int] or None:
-        entidades = self._client._state.get("entities")
-        return list(filter(lambda entity: entity.get(
-            (entity.get("type") == "m" or
-            entity.get("type") == "w" or
-            entity.get("type") == "o" or 
-            entity.get("type") == "b" or
-            entity.get("type") == "x"), entidades)))
-        # return list(filter(lambda entity: entity.get(
-        #     "unit_id") == unit and entity.get("type") == "b", entidades))
-
     # usar o A* para definir uma função que retorne o melhor posicionamento para a unidade no momento de explosao
     # essa func recebe o x e y da unidade e o x e y da bomba 
     # atualmente é feito por if(x !=agent_x or x !=agent_x+1 or y != agent_y or y != agent_y+1):
